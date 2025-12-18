@@ -1,0 +1,652 @@
+/* DreamsPage Styles */
+.dreams-container {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #1a2c5b, #0b1633 55%, #081027);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Back button (NEW) */
+.dream-top {
+  display: flex;
+  justify-content: flex-start;
+  padding: 10px 10px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.dream-back {
+  text-decoration: none;
+  color: #cfe0ff;
+  opacity: 0.95;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dream-back:hover {
+  opacity: 1;
+}
+
+.overlay-back {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+}
+
+/* Welcome Overlay Animation */
+.welcome-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top, #1a2c5b, #0b1633 55%, #081027);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  color: white;
+  text-align: center;
+}
+
+.graduation-cap {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: bounce 2s infinite;
+}
+
+.welcome-text {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  opacity: 0;
+  animation: slideIn 1s ease-out 0.5s forwards;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  opacity: 0;
+  animation: slideIn 1s ease-out 1s forwards;
+}
+
+/* Hiraku Button in Welcome Overlay */
+.hiraku-button-container {
+  margin-top: 30px;
+  opacity: 0;
+  animation: fadeInButton 1.5s ease-in-out 2s forwards;
+}
+
+.hiraku-button {
+  position: relative;
+  padding: 16px 64px;
+  color: white;
+  font-size: 2rem;
+  font-weight: 500;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(to right, #d97706, #eab308, #fbbf24);
+  transform: translateY(0);
+  transition: all 0.3s ease-out;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.hiraku-button:hover {
+  background: linear-gradient(to right, #eab308, #fbbf24, #fde047);
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(251, 191, 36, 0.5);
+}
+
+.hiraku-button:active {
+  transform: scale(0.95);
+}
+
+.button-text {
+  position: relative;
+  z-index: 10;
+}
+
+.warning-text {
+  font-size: 0.7rem;
+  margin-top: 10px;
+  color: #ffeb3b;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.button-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50px;
+  background: linear-gradient(to right, #fbbf24, #d97706);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  filter: blur(40px);
+}
+
+.hiraku-button:hover .button-glow {
+  opacity: 0.2;
+}
+
+.button-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 50px;
+  background: linear-gradient(to right, transparent, white, transparent);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  transform: skewX(-12deg);
+}
+
+.hiraku-button:hover .button-shine {
+  opacity: 0.1;
+}
+
+@keyframes fadeInButton {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Particles Effect */
+.particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: gold;
+  border-radius: 50%;
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Main Content */
+.main-content {
+  padding: 10px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+}
+
+.hero {
+  text-align: center;
+  color: white;
+  padding: 30px 20px 20px;
+}
+
+.hero h1 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Family Image */
+.family-image-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.family-image {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  opacity: 0;
+  animation: fadeInImage 1s ease-in-out 1s forwards;
+}
+
+.family-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes fadeInImage {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Family Title with Glitter */
+.family-title-container {
+  text-align: center;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+.family-title {
+  position: relative;
+  display: inline-block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.5);
+  letter-spacing: 3px;
+  opacity: 0;
+  animation: fadeInTitle 1.5s ease-in-out 2s forwards, titleGlow 3s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% {
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.5);
+  }
+  50% {
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.5), 0 0 30px rgba(255,255,255,0.8), 0 0 40px rgba(255,235,59,0.6);
+  }
+}
+
+.glitter-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.glitter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, #fff 0%, #ffeb3b 50%, #fff 100%);
+  box-shadow: 0 0 15px #fff, 0 0 25px #ffeb3b, 0 0 35px #fff;
+  animation: glitterMove 2s linear infinite;
+  border-radius: 50%;
+}
+
+.glitter:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; }
+.glitter:nth-child(2) { left: 25%; top: 60%; animation-delay: 0.2s; }
+.glitter:nth-child(3) { left: 40%; top: 10%; animation-delay: 0.4s; }
+.glitter:nth-child(4) { left: 55%; top: 70%; animation-delay: 0.6s; }
+.glitter:nth-child(5) { left: 70%; top: 30%; animation-delay: 0.8s; }
+.glitter:nth-child(6) { left: 85%; top: 50%; animation-delay: 1.0s; }
+.glitter:nth-child(7) { left: 15%; top: 80%; animation-delay: 1.2s; }
+.glitter:nth-child(8) { left: 35%; top: 40%; animation-delay: 1.4s; }
+.glitter:nth-child(9) { left: 60%; top: 90%; animation-delay: 1.6s; }
+.glitter:nth-child(10) { left: 80%; top: 15%; animation-delay: 1.8s; }
+.glitter:nth-child(11) { left: 5%; top: 45%; animation-delay: 0.1s; }
+.glitter:nth-child(12) { left: 45%; top: 75%; animation-delay: 0.3s; }
+.glitter:nth-child(13) { left: 65%; top: 25%; animation-delay: 0.5s; }
+.glitter:nth-child(14) { left: 90%; top: 65%; animation-delay: 0.7s; }
+.glitter:nth-child(15) { left: 30%; top: 55%; animation-delay: 0.9s; }
+
+@keyframes glitterMove {
+  0% {
+    transform: translateY(0) scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-5px) scale(1) rotate(90deg);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-15px) scale(1.2) rotate(270deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px) scale(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInTitle {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Family Subtitle with Beautiful Effects */
+.family-subtitle {
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: white;
+  text-shadow: 1px 1px 6px rgba(0,0,0,0.4);
+  letter-spacing: 2px;
+  margin-top: 15px;
+  opacity: 0;
+  animation: fadeInSubtitle 2s ease-in-out 2.5s forwards, gentleFloat 4s ease-in-out infinite;
+  position: relative;
+}
+
+.family-subtitle::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffeb3b, transparent);
+  transform: translateX(-50%);
+  animation: lineExpand 2s ease-in-out 3s forwards;
+}
+
+.family-subtitle::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffeb3b, transparent);
+  transform: translateX(-50%);
+  animation: lineExpand 2s ease-in-out 3.2s forwards;
+}
+
+@keyframes fadeInSubtitle {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes lineExpand {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    width: 120%;
+    opacity: 0.8;
+  }
+}
+
+/* Form Container */
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  opacity: 0;
+  animation: fadeInForm 1s ease-in-out 3s forwards;
+}
+
+.graduation-form {
+  width: 100%;
+  height: 80vh;
+  min-height: 700px;
+  border: none;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeInForm {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .family-image {
+    width: 95%;
+    max-width: 95%;
+  }
+
+  .family-title {
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+  }
+
+  .family-title-container {
+    margin-top: 20px;
+  }
+
+  .family-subtitle {
+    font-size: 1.5rem;
+    letter-spacing: 1.5px;
+    margin-top: 12px;
+  }
+
+  .graduation-cap {
+    font-size: 3rem;
+  }
+
+  .welcome-text {
+    font-size: 1.5rem;
+  }
+
+  .graduation-form {
+    height: 85vh;
+    min-height: 600px;
+  }
+}
+
+@media (max-width: 480px) {
+  .family-image {
+    width: 98%;
+    max-width: 98%;
+  }
+
+  .family-title {
+    font-size: 2.5rem;
+    letter-spacing: 1px;
+  }
+
+  .family-title-container {
+    margin-top: 15px;
+  }
+
+  .family-subtitle {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    margin-top: 10px;
+  }
+
+  .graduation-form {
+    height: 90vh;
+    min-height: 550px;
+  }
+}
+
+/* Audio Controls */
+.audio-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px 15px;
+  border-radius: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.audio-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.audio-btn:active {
+  transform: scale(0.95);
+}
+
+.audio-btn.playing {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+  }
+}
+
+.audio-status {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Hide audio element */
+audio {
+  display: none;
+}
+
+/* Responsive audio controls */
+@media (max-width: 768px) {
+  .audio-controls {
+    top: 15px;
+    right: 15px;
+    padding: 8px 12px;
+  }
+
+  .audio-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .audio-status {
+    font-size: 11px;
+  }
+}
+
+.form-actions{
+  max-width:800px;
+  margin: 14px auto 30px;
+  padding: 0 20px;
+}
+
+.done-btn{
+  width:100%;
+  padding:14px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.14);
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+}
+.done-btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
