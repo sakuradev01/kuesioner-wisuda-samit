@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { session } from "../auth/session";
-import "./IsDonePage.css";
+import "./isDonePage.css";
 
 export default function IsDonePage() {
   const navigate = useNavigate();
