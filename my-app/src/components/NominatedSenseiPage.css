@@ -1,67 +1,96 @@
-/* Background navy */
 .nom-page{
   min-height:100vh;
-  padding:28px 16px;
+  padding:24px 16px;
   background: radial-gradient(circle at top, #1a2c5b, #0b1633 55%, #081027);
-  color:#eaf0ff;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
 }
 
 .nom-wrap{
-  width:min(980px, 100%);
-  margin:0 auto;
+  width:min(1100px, 100%);
+  transition: filter .14s ease, transform .14s ease, opacity .14s ease;
+}
+
+.nom-wrap.is-blurred{
+  filter: blur(10px) saturate(.85);
+  transform: scale(.985);
+  opacity: .95;
+  pointer-events:none;
+  user-select:none;
 }
 
 .nom-top{
   display:flex;
   align-items:flex-start;
-  justify-content:space-between;
-  gap:16px;
-  margin-bottom:16px;
+  gap:14px;
+  margin-bottom:14px;
 }
 
 .nom-back{
+  color:#eaf0ff;
   text-decoration:none;
-  color:#cfe0ff;
-  opacity:.85;
+  font-weight:700;
+  opacity:.9;
   padding:10px 12px;
-  border-radius:12px;
+  border-radius:999px;
+  background: rgba(255,255,255,0.08);
   border:1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
 }
-.nom-back:hover{ opacity:1; }
 
 .nom-titleWrap{
-  text-align:center;
-  flex: 1 1 auto;
+  flex:1;
+  padding:10px 14px;
+  border-radius:18px;
+  background: rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.10);
 }
 
 .nom-badge{
   display:inline-block;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid rgba(214, 175, 88, 0.35);
-  background: rgba(214, 175, 88, 0.10);
-  color:#f3d48a;
-  font-weight:800;
-  letter-spacing:.8px;
+  font-weight:900;
   font-size:12px;
+  letter-spacing:1px;
+  color:#9cc2ff;
+  opacity:.95;
 }
 
 .nom-title{
-  margin:10px 0 4px;
-  font-size:34px;
-  font-weight:900;
-  color:#2f66ff;
+  margin:6px 0 0;
+  color:#eaf0ff;
+  font-size:24px;
+  letter-spacing:.2px;
 }
 
 .nom-subtitle{
-  margin:0;
-  opacity:.85;
+  margin:8px 0 0;
+  color:#d7e3ff;
+  opacity:.92;
+  font-size:14px;
+}
+
+.nom-progress{
+  margin-top:10px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.nom-progress .dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background: rgba(255,255,255,0.18);
+  border:1px solid rgba(255,255,255,0.18);
+}
+.nom-progress .dot.on{
+  background: rgba(47,102,255,0.75);
+  border-color: rgba(47,102,255,0.75);
+  box-shadow: 0 0 0 6px rgba(47,102,255,0.10);
 }
 
 .nom-card{
   padding:18px;
-  border-radius:24px;
+  border-radius:22px;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.12);
   backdrop-filter: blur(14px);
@@ -69,168 +98,367 @@
   box-shadow: 0 18px 60px rgba(0,0,0,0.35);
 }
 
-.nom-section{
-  padding:14px 8px;
+/* step mount animation */
+.step-panel{
+  animation: stepIn .30s ease both;
+}
+@keyframes stepIn{
+  from{ opacity:0; transform: translateY(10px); }
+  to{ opacity:1; transform: translateY(0); }
 }
 
+.nom-section{ margin-top: 10px; }
 .nom-h2{
+  color:#eaf0ff;
   margin:0 0 12px;
   font-size:16px;
-  font-weight:800;
-  color:#f3d48a;
 }
 
-/* Kelas pills (radio) */
+/* kelas pills */
 .nom-radioGrid{
   display:flex;
   flex-wrap:wrap;
   gap:10px;
 }
-
 .nom-pill{
-  position:relative;
-  cursor:pointer;
-}
-.nom-pill input{
-  position:absolute;
-  opacity:0;
-  pointer-events:none;
-}
-.nom-pillText{
-  display:inline-block;
-  padding:10px 12px;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
   border-radius:999px;
-  border:1px solid rgba(255,255,255,0.16);
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
   color:#eaf0ff;
-  font-weight:700;
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+  cursor:pointer;
+  user-select:none;
 }
-.nom-pill input:checked + .nom-pillText{
-  border-color: rgba(214, 175, 88, 0.75);
-  background: rgba(214, 175, 88, 0.12);
-  transform: translateY(-1px);
-}
+.nom-pill input{ accent-color:#2f66ff; }
+.nom-pillText{ font-weight:800; font-size:14px; }
 
-/* Sensei grid */
+/* ===== GRID: PC 4 col, Mobile 2 col ===== */
 .nom-grid{
   display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap:12px;
+}
+.nom-grid--portrait{
+  grid-template-columns: repeat(4, minmax(0,1fr));
   gap:14px;
 }
 
-/* Card radio */
 .senseiCard{
-  position:relative;
-  cursor:pointer;
-}
-.senseiCard input{
-  position:absolute;
-  opacity:0;
-  pointer-events:none;
-}
-
-.senseiInner{
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.10);
   border-radius:18px;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.06);
-  transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+  cursor:pointer;
+  color:#eaf0ff;
+  text-align:left;
+  transition: transform .14s ease, background .14s ease, border-color .14s ease, box-shadow .14s ease, opacity .18s ease;
 }
 
-.senseiImgWrap{
-  position:relative;
-  height:180px;
-  background: rgba(0,0,0,0.25);
+.senseiCard:hover{
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.12);
 }
-.senseiImgWrap img{
+
+.senseiCard.is-active{
+  border-color: rgba(47,102,255,0.80);
+  box-shadow: 0 0 0 6px rgba(47,102,255,0.12), 0 18px 60px rgba(0,0,0,0.35);
+}
+
+.senseiCard.is-blocked{
+  opacity:.55;
+  cursor:not-allowed;
+  transform:none !important;
+}
+
+/* IMPORTANT: hide originals smoothly */
+.senseiCard.is-ghosted{ opacity: 0; }
+
+/* portrait card sizing */
+.senseiCard--portrait{
+  padding:0;
+  border-radius:22px;
+  overflow:hidden;
+  position:relative;
+  aspect-ratio: 4 / 6;
+}
+
+/* media */
+.senseiMedia{
+  position:relative;
   width:100%;
   height:100%;
-  object-fit: cover; /* biar foto memenuhi frame */ 
-  display:block;
 }
-.senseiGlow{
+.senseiMedia img{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
+  transform: scale(1.02);
+  transition: transform .3s ease;
+}
+.senseiCard--portrait:hover .senseiMedia img{
+  transform: scale(1.06);
+}
+
+/* bottom gradient */
+.senseiShade{
   position:absolute;
   inset:0;
-  background: radial-gradient(circle at 50% 20%, rgba(214,175,88,0.18), transparent 60%);
+  background:
+    linear-gradient(to top, rgba(8,16,39,0.92) 0%, rgba(8,16,39,0.55) 35%, rgba(8,16,39,0.0) 70%);
   pointer-events:none;
 }
 
-.senseiName{
-  padding:12px 14px 14px;
-  font-weight:900;
-  letter-spacing:.3px;
-  color:#f3d48a;
+/* overlay meta */
+.senseiMeta{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:12px 12px 10px;
+  color:#eaf0ff;
 }
 
-.senseiCard:hover .senseiInner{
-  transform: translateY(-1px);
+.senseiMetaTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
 }
 
-/* Selected state (radio checked) */
-.senseiCard input:checked + .senseiInner{
-  border-color: rgba(214, 175, 88, 0.9);
-  box-shadow: 0 0 0 2px rgba(214,175,88,0.22), 0 18px 50px rgba(0,0,0,0.35);
+.senseiNameBig{
+  font-weight: 950;
+  font-size: 14px;
+  letter-spacing:.2px;
+  text-transform: uppercase;
 }
 
-/* Reason textarea */
+.senseiCheck{
+  width:26px;
+  height:26px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  background: rgba(47,102,255,0.85);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 10px 30px rgba(47,102,255,0.25);
+  font-weight: 1000;
+}
+
+.senseiRoleLine{
+  margin-top:6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+  font-size: 11px;
+  opacity:.92;
+}
+.senseiRole{ font-weight: 800; color: rgba(234,240,255,0.95); }
+.senseiDot{ opacity:.8; }
+.senseiField{ font-weight: 900; color: rgba(255,213,120,0.95); }
+
 .nom-textarea{
   width:100%;
   border-radius:16px;
-  padding:14px 14px;
-  border:1px solid rgba(255,255,255,0.16);
-  background: rgba(255,255,255,0.06);
+  padding:14px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(8,16,39,0.45);
   color:#eaf0ff;
   outline:none;
-  resize:vertical;
+  resize: none;
 }
-.nom-textarea:focus{
-  border-color: rgba(214,175,88,0.75);
-  box-shadow: 0 0 0 3px rgba(214,175,88,0.15);
-}
+.nom-textarea::placeholder{ color: rgba(234,240,255,0.55); }
 
-.nom-actions{
-  padding:10px 8px 4px;
+.step-actions{
+  margin-top:14px;
   display:flex;
   flex-direction:column;
   gap:10px;
+  align-items:flex-end;
+}
+.step-actions--row{
+  flex-direction:row;
+  justify-content:space-between;
   align-items:center;
 }
 
 .nom-btn{
-  width:min(360px, 100%);
-  padding:14px 16px;
   border:none;
   border-radius:999px;
+  padding:12px 16px;
   font-weight:900;
   cursor:pointer;
-  color:#0b1633;
-  background: linear-gradient(180deg, #f3d48a, #d6af58);
+  color:#081027;
+  background: linear-gradient(to right, #d97706, #eab308, #fbbf24);
+  transition: transform .12s ease, filter .12s ease;
 }
+.nom-btn:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+.nom-btn:active{ transform: scale(.98); }
 .nom-btn:disabled{
-  opacity:.45;
+  opacity:.55;
   cursor:not-allowed;
+  transform:none !important;
+  filter:none !important;
+}
+.nom-btn.ghost{
+  background: rgba(255,255,255,0.10);
+  color:#eaf0ff;
+  border:1px solid rgba(255,255,255,0.14);
 }
 
 .nom-hint{
-  opacity:.75;
+  color:#d7e3ff;
+  opacity:.9;
   font-size:12px;
 }
 
-.senseiCard{
-  border:0;
-  background:transparent;
-  padding:0;
-  text-align:left;
-  cursor:pointer;
+/* ===== Overlay ===== */
+.nom-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:18px 14px;
+  pointer-events:auto;
+}
+.nom-overlay-backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,0.46);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+.nom-overlay-backdrop.is-on{ opacity: 1; }
+
+/* ===== Ghosts (FLIP) ===== */
+.nom-ghost{
+  position:fixed;
+  z-index:10000;
+  border-radius:22px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+  transform-origin: top left;
+  will-change: transform, opacity;
+  opacity: 1;
+}
+.nom-ghost[data-phase="init"]{ transition: none; }
+.nom-ghost[data-phase="play"]{
+  transition: transform .56s cubic-bezier(.2,.8,.2,1), opacity .18s ease;
+}
+.nom-ghost.is-fade{ opacity: 0; }
+
+/* ===== Reason Sheet ===== */
+.nom-sheet{
+  position:relative;
+  z-index:10001;
+  width: min(820px, 100%);
+  margin-top: 7vh;
+  border-radius:22px;
+  background: rgba(255,255,255,0.10);
+  border:1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 22px 70px rgba(0,0,0,0.45);
+  padding:18px;
+
+  /* ✅ SAFETY: biar textarea & tombol gak "hilang" */
+  max-height: 86vh;
+  overflow: auto;
+
+  animation: sheetIn .28s ease both;
+}
+@keyframes sheetIn{
+  from{ opacity:0; transform: translateY(8px) scale(.99); }
+  to{ opacity:1; transform: translateY(0) scale(1); }
 }
 
-.senseiCard.is-active .senseiInner{
-  outline: 2px solid rgba(255, 235, 59, 0.9);
-  box-shadow: 0 0 0 4px rgba(255, 235, 59, 0.18);
+.nom-sheet-head{ display:flex; flex-direction:column; gap:4px; margin-bottom:12px; }
+.nom-sheet-title{ color:#eaf0ff; font-size:18px; font-weight:900; }
+.nom-sheet-sub{ color:#d7e3ff; opacity:.9; font-size:13px; }
+
+/* ✅ INI YANG NGEBENERIN: card pilihan di sheet JANGAN full width */
+.nom-pickedRow{
+  display:grid;
+  gap:12px;
+  margin: 12px 0 12px;
+
+  /* 2 card: masing-masing max 220px, center */
+  grid-template-columns: repeat(2, minmax(0, 220px));
+  justify-content: center;
 }
 
-.senseiCard.is-blocked{
-  opacity:.5;
-  cursor:not-allowed;
+.nom-pickedRow.is-single{
+  /* 1 card: max 320px, center */
+  grid-template-columns: minmax(0, 320px);
+  justify-content: center;
+}
+
+.nom-pickedCard{
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+}
+
+.nom-pickedCard--portrait{
+  aspect-ratio: 4 / 6;
+}
+
+.nom-label{
+  display:block;
+  margin: 6px 0 8px;
+  color:#eaf0ff;
+  font-weight:800;
+  font-size:13px;
+  opacity:.95;
+}
+.nom-textarea--sheet{ background: rgba(8,16,39,0.55); }
+
+.nom-sheet-actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-top:14px;
+}
+
+.nom-hint--sheet{ margin-top:10px; }
+
+/* responsive: tablet/mobile 2 kolom */
+@media (max-width: 820px){
+  .nom-grid--portrait{
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  /* sheet picked cards lebih kecil biar enak */
+  .nom-pickedRow{
+    grid-template-columns: repeat(2, minmax(0, 180px));
+  }
+  .nom-pickedRow.is-single{
+    grid-template-columns: minmax(0, 260px);
+  }
+}
+
+@media (max-width: 420px){
+  .nom-pickedRow{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .step-panel,
+  .nom-sheet{ animation: none !important; }
+  .nom-ghost{ transition: none !important; }
+  .nom-wrap,
+  .nom-btn,
+  .senseiCard{ transition: none !important; }
 }

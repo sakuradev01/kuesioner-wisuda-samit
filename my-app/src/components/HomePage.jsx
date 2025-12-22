@@ -21,7 +21,7 @@ export default function HomePage() {
 
     const load = async () => {
       try {
-        const res = await fetch("http://localhost:3002/api/wisuda/status", {
+        const res = await fetch("http://localhost:3003/api/wisuda/status", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

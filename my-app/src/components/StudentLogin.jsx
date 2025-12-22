@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { session } from "../auth/session";
 import "./StudentLogin.css";
 
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3003";
+
 function StudentLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -20,13 +22,13 @@ function StudentLogin() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3002/api/auth/login", {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uuid: username, password }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
         alert("❌ " + (data.message || "Login gagal"));
@@ -34,11 +36,33 @@ function StudentLogin() {
         return;
       }
 
+      // ✅ simpan sesi student
       session.setToken(data.token);
+      session.setRole("student");
       if (data.user) session.setUser(data.user);
 
-      const to = location.state?.from?.pathname || "/questionnaire";
+      // ✅ cek status dulu (biar kalau sudah isi, langsung ke done)
+      let status = null;
+      try {
+        const st = await fetch(`${API_BASE}/api/wisuda/status`, {
+          headers: { Authorization: `Bearer ${data.token}` },
+        });
+        if (st.ok) status = await st.json().catch(() => null);
+      } catch {
+        // ignore
+      }
 
+      // jika sudah done nomination => ke done
+      if (status?.isDone_nomination === 1 || status?.isDone_nomination === true) {
+        navigate("/nominations/done", {
+          replace: true,
+          state: { formName: "Nominasi Sensei Terbaik" },
+        });
+        return;
+      }
+
+      // default: balik ke route tujuan atau nominations
+      const to = location.state?.from?.pathname || "/nominations";
       navigate(to, { replace: true });
     } catch (err) {
       alert("❌ API tidak bisa dihubungi");

@@ -14,7 +14,24 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
-app.use(cors({ origin: "http://localhost:5173" }));
+
+// ✅ CORS: allow dev + prod (kalau kamu pakai proxy / same-origin, ini juga aman)
+const allowedOrigins = new Set([
+  "http://localhost:5173",
+  "https://wisuda-v2.samit.co.id",
+  "https://www.wisuda-v2.samit.co.id",
+]);
+
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true); // curl/postman
+      if (allowedOrigins.has(origin)) return cb(null, true);
+      return cb(null, false);
+    },
+  })
+);
+
 app.use(express.json());
 
 const pool = mysql.createPool({
@@ -23,10 +40,7 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-
-  // Kalau hosting kamu WAJIB SSL, uncomment bagian ini:
-  // ssl: { rejectUnauthorized: true },
-
+  // ssl: { rejectUnauthorized: true }, // kalau hosting wajib SSL, uncomment
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -48,7 +62,6 @@ function requireJwt(req, res, next) {
 
 // --- helper: pastikan row wisuda_questionnaire ada ---
 async function ensureWisudaRow(uuid) {
-  // butuh UNIQUE uuid biar upsert ini jalan
   await pool.execute(
     `INSERT INTO wisuda_questionnaire (uuid)
      VALUES (?)
@@ -65,7 +78,6 @@ app.post("/api/auth/login", async (req, res) => {
       return res.status(400).json({ message: "uuid dan password wajib" });
     }
 
-    // cek user dari tabel student
     const [rows] = await pool.execute(
       "SELECT id, uuid, password, name FROM student WHERE uuid = ? LIMIT 1",
       [uuid]
@@ -77,12 +89,10 @@ app.post("/api/auth/login", async (req, res) => {
 
     const user = rows[0];
 
-    // PHP bcrypt ($2y$) -> Node kadang perlu $2b$
     const hash = String(user.password).replace(/^\$2y\$/, "$2b$");
     const ok = await bcrypt.compare(password, hash);
     if (!ok) return res.status(401).json({ message: "Login gagal" });
 
-    // auto create row wisuda_questionnaire
     await ensureWisudaRow(user.uuid);
 
     const token = jwt.sign(
@@ -93,12 +103,7 @@ app.post("/api/auth/login", async (req, res) => {
 
     return res.json({
       token,
-      user: {
-        id: user.id,
-        uuid: user.uuid,
-        name: user.name,
-        dalang_access: user.dalang_access,
-      },
+      user: { id: user.id, uuid: user.uuid, name: user.name },
     });
   } catch (err) {
     console.error(err);
@@ -106,7 +111,7 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-// ============ GET STATUS (done apa belum) ============
+// ============ GET STATUS ============
 app.get("/api/wisuda/status", requireJwt, async (req, res) => {
   try {
     const uuid = req.user.uuid;
@@ -129,16 +134,21 @@ app.get("/api/wisuda/status", requireJwt, async (req, res) => {
   }
 });
 
-// ============ SUBMIT NOMINATION ============
+// ============ SUBMIT NOMINATION (vote2 optional) ============
 app.post("/api/wisuda/nomination", requireJwt, async (req, res) => {
   try {
     const uuid = req.user.uuid;
     const { student_class, vote1, vote2, reason } = req.body;
 
-    if (!student_class || !vote1 || !vote2 || !reason?.trim()) {
+    // ✅ vote2 boleh null, tapi vote1 & reason wajib
+    if (!student_class || !vote1 || !reason?.trim()) {
       return res.status(400).json({ message: "Data nominasi belum lengkap" });
     }
-    if (vote1 === vote2) {
+
+    // normalize vote2
+    const v2 = vote2 ? String(vote2).trim() : null;
+
+    if (v2 && vote1 === v2) {
       return res.status(400).json({ message: "Vote 1 dan Vote 2 tidak boleh sama" });
     }
 
@@ -153,7 +163,7 @@ app.post("/api/wisuda/nomination", requireJwt, async (req, res) => {
         nomination_vote_2 = VALUES(nomination_vote_2),
         nomination_reason = VALUES(nomination_reason),
         isDone_nomination = 1`,
-      [uuid, student_class, vote1, vote2, reason]
+      [uuid, student_class, vote1, v2, reason]
     );
 
     return res.json({ ok: true });
@@ -171,8 +181,7 @@ app.post("/api/wisuda/dreams", requireJwt, async (req, res) => {
     await pool.execute(
       `INSERT INTO wisuda_questionnaire (uuid, isDone_dreams)
        VALUES (?, 1)
-       ON DUPLICATE KEY UPDATE
-        isDone_dreams = 1`,
+       ON DUPLICATE KEY UPDATE isDone_dreams = 1`,
       [uuid]
     );
 
@@ -183,4 +192,60 @@ app.post("/api/wisuda/dreams", requireJwt, async (req, res) => {
   }
 });
 
-app.listen(3002, () => console.log("API running on http://localhost:3002"));
+// ============ ADMIN: GET NOMINATIONS + SUMMARY ============
+app.get("/api/admin/nominations", async (req, res) => {
+  try {
+    // list submissions
+    const [rows] = await pool.execute(
+      `
+      SELECT
+        w.uuid,
+        s.name AS student_name,
+        w.\`class\` AS student_class,
+        w.nomination_vote_1 AS vote1,
+        w.nomination_vote_2 AS vote2,
+        w.nomination_reason AS reason,
+        w.updated_at
+      FROM wisuda_questionnaire w
+      LEFT JOIN student s ON s.uuid = w.uuid
+      WHERE w.isDone_nomination = 1
+      ORDER BY w.updated_at DESC
+      `
+    );
+
+    // summary vote counts (vote1 + vote2 digabung)
+    const [summary] = await pool.execute(
+      `
+      SELECT vote, COUNT(*) AS total
+      FROM (
+        SELECT nomination_vote_1 AS vote
+        FROM wisuda_questionnaire
+        WHERE isDone_nomination = 1
+          AND nomination_vote_1 IS NOT NULL
+          AND nomination_vote_1 <> ''
+
+        UNION ALL
+
+        SELECT nomination_vote_2 AS vote
+        FROM wisuda_questionnaire
+        WHERE isDone_nomination = 1
+          AND nomination_vote_2 IS NOT NULL
+          AND nomination_vote_2 <> ''
+      ) t
+      GROUP BY vote
+      ORDER BY total DESC
+      `
+    );
+
+    return res.json({
+      nominations: rows || [],
+      summary: summary || [],
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+const PORT = Number(process.env.PORT || 3003);
+app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));

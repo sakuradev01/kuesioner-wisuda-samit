@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { session } from "../auth/session";
 import "./AdminLogin.css";
 
 function AdminLogin() {
@@ -12,21 +13,21 @@ function AdminLogin() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login process
     setTimeout(() => {
       if (username === "admin" && password === "admin123") {
-        console.log("✅ Login berhasil! Redirecting to dashboard...");
-        // Navigate to admin dashboard
-        navigate("/admin-dashboard");
+        // pastikan mode admin ON, student token OFF
+        session.clearAll();
+        session.setRole("admin");
+        navigate("/admin-dashboard", { replace: true });
       } else {
         alert("❌ Username atau password salah!");
         setIsLoading(false);
       }
-    }, 1000);
+    }, 800);
   };
 
   const handleBackToHome = () => {
-    navigate("/");
+    navigate("/admin", { replace: true });
   };
 
   return (
@@ -64,27 +65,8 @@ function AdminLogin() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={isLoading}
-          >
+          <button type="submit" className="btn btn-primary" disabled={isLoading}>
             {isLoading ? "⏳ Memproses..." : "🚀 Masuk"}
-          </button>
-
-          {/* <div className="login-info">
-            <p>Demo Credentials:</p>
-            <p><strong>Username:</strong> admin</p>
-            <p><strong>Password:</strong> admin123</p>
-          </div> */}
-
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleBackToHome}
-            disabled={isLoading}
-          >
-            ← Kembali ke Beranda
           </button>
         </form>
       </div>

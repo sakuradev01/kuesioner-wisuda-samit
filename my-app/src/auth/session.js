@@ -1,23 +1,36 @@
+const KEY_TOKEN = "token";
+const KEY_USER = "user";
+const KEY_ROLE = "role";
+
 export const session = {
+  // token (student)
   getToken() {
-    return sessionStorage.getItem("token");
+    return localStorage.getItem(KEY_TOKEN);
   },
   setToken(token) {
-    sessionStorage.setItem("token", token);
-  },
-  clearToken() {
-    sessionStorage.removeItem("token");
+    localStorage.setItem(KEY_TOKEN, token);
   },
 
+  // user (student)
   getUser() {
-    const raw = sessionStorage.getItem("user");
+    const raw = localStorage.getItem(KEY_USER);
     return raw ? JSON.parse(raw) : null;
   },
   setUser(user) {
-    sessionStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem(KEY_USER, JSON.stringify(user));
   },
+
+  // role
+  getRole() {
+    return localStorage.getItem(KEY_ROLE);
+  },
+  setRole(role) {
+    localStorage.setItem(KEY_ROLE, role);
+  },
+
   clearAll() {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
+    localStorage.removeItem(KEY_TOKEN);
+    localStorage.removeItem(KEY_USER);
+    localStorage.removeItem(KEY_ROLE);
   },
 };
