@@ -24,7 +24,7 @@ export default function NominatedSenseiPage() {
       { name: "Gagah Sensei", img: "/family.png", role: "Japanese Instructor", field: "Basic Level" },
       { name: "Gilang Sensei", img: "/family.png", role: "Japanese Instructor", field: "Basic Level" },
       { name: "Crystal Sensei", img: "/family.png", role: "Japanese Instructor", field: "Advance Level" },
-      { name: "Saidah Sensei", img: "/family.png", role: "Japanese Instructor", field: "Advance Level" },
+      { name: "Saidah Sensei", img: "/saidah.png", role: "Japanese Instructor", field: "Advance Level" },
       { name: "Ega Sensei", img: "/family.png", role: "Japanese Instructor", field: "SSW - Caregiver" },
       { name: "Derisna Sensei", img: "/family.png", role: "Japanese Instructor", field: "SSW - Food Service" },
     ],
