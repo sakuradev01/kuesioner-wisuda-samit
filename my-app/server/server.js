@@ -29,6 +29,7 @@ app.use(
       if (allowedOrigins.has(origin)) return cb(null, true);
       return cb(null, false);
     },
+    credentials: true,
   })
 );
 
@@ -40,7 +41,6 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-  // ssl: { rejectUnauthorized: true }, // kalau hosting wajib SSL, uncomment
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -61,11 +61,15 @@ function requireJwt(req, res, next) {
 }
 
 // --- helper: pastikan row wisuda_questionnaire ada ---
+// ✅ MariaDB-friendly: NO "AS new"
 async function ensureWisudaRow(uuid) {
+  // Note: ini butuh uuid punya UNIQUE index, sama seperti yang kamu pakai sebelumnya.
   await pool.execute(
-    `INSERT INTO wisuda_questionnaire (uuid)
-     VALUES (?)
-     ON DUPLICATE KEY UPDATE uuid = VALUES(uuid)`,
+    `
+    INSERT INTO wisuda_questionnaire (uuid)
+    VALUES (?)
+    ON DUPLICATE KEY UPDATE uuid = VALUES(uuid)
+    `,
     [uuid]
   );
 }
@@ -119,8 +123,9 @@ app.get("/api/wisuda/status", requireJwt, async (req, res) => {
 
     const [rows] = await pool.execute(
       `SELECT
-        class,
-        nomination_vote_1, nomination_vote_2, nomination_reason,
+        \`class\` AS class,
+        nomination_vote_1, nomination_vote_2,
+        nomination_reason_1, nomination_reason_2,
         isDone_nomination, isDone_dreams
       FROM wisuda_questionnaire
       WHERE uuid = ? LIMIT 1`,
@@ -134,36 +139,48 @@ app.get("/api/wisuda/status", requireJwt, async (req, res) => {
   }
 });
 
-// ============ SUBMIT NOMINATION (vote2 optional) ============
+// ============ SUBMIT NOMINATION (vote2 optional, reason2 ikut optional) ============
 app.post("/api/wisuda/nomination", requireJwt, async (req, res) => {
   try {
     const uuid = req.user.uuid;
-    const { student_class, vote1, vote2, reason } = req.body;
+    const { student_class, vote1, vote2, reason1, reason2 } = req.body;
 
-    // ✅ vote2 boleh null, tapi vote1 & reason wajib
-    if (!student_class || !vote1 || !reason?.trim()) {
+    const v1 = vote1 ? String(vote1).trim() : "";
+    const v2 = vote2 ? String(vote2).trim() : null;
+
+    const r1 = (reason1 ?? "").toString().trim();
+    const r2 = (reason2 ?? "").toString().trim();
+
+    // ✅ minimal required
+    if (!student_class || !v1 || !r1) {
       return res.status(400).json({ message: "Data nominasi belum lengkap" });
     }
 
-    // normalize vote2
-    const v2 = vote2 ? String(vote2).trim() : null;
+    // ✅ vote2 optional, tapi kalau ada vote2 → reason2 wajib
+    if (v2 && !r2) {
+      return res.status(400).json({ message: "Alasan Vote 2 wajib diisi" });
+    }
 
-    if (v2 && vote1 === v2) {
+    if (v2 && v1 === v2) {
       return res.status(400).json({ message: "Vote 1 dan Vote 2 tidak boleh sama" });
     }
 
     await pool.execute(
-      `INSERT INTO wisuda_questionnaire
-        (uuid, class, nomination_vote_1, nomination_vote_2, nomination_reason, isDone_nomination)
-       VALUES
-        (?, ?, ?, ?, ?, 1)
-       ON DUPLICATE KEY UPDATE
-        class = VALUES(class),
+      `
+      INSERT INTO wisuda_questionnaire
+        (uuid, \`class\`, nomination_vote_1, nomination_vote_2, nomination_reason_1, nomination_reason_2, isDone_nomination)
+      VALUES
+        (?, ?, ?, ?, ?, ?, 1)
+      ON DUPLICATE KEY UPDATE
+        \`class\` = VALUES(\`class\`),
         nomination_vote_1 = VALUES(nomination_vote_1),
         nomination_vote_2 = VALUES(nomination_vote_2),
-        nomination_reason = VALUES(nomination_reason),
-        isDone_nomination = 1`,
-      [uuid, student_class, vote1, v2, reason]
+        nomination_reason_1 = VALUES(nomination_reason_1),
+        nomination_reason_2 = VALUES(nomination_reason_2),
+        isDone_nomination = 1,
+        updated_at = NOW()
+      `,
+      [uuid, student_class, v1, v2, r1, v2 ? r2 : null]
     );
 
     return res.json({ ok: true });
@@ -179,9 +196,11 @@ app.post("/api/wisuda/dreams", requireJwt, async (req, res) => {
     const uuid = req.user.uuid;
 
     await pool.execute(
-      `INSERT INTO wisuda_questionnaire (uuid, isDone_dreams)
-       VALUES (?, 1)
-       ON DUPLICATE KEY UPDATE isDone_dreams = 1`,
+      `
+      INSERT INTO wisuda_questionnaire (uuid, isDone_dreams)
+      VALUES (?, 1)
+      ON DUPLICATE KEY UPDATE isDone_dreams = 1
+      `,
       [uuid]
     );
 
@@ -195,7 +214,6 @@ app.post("/api/wisuda/dreams", requireJwt, async (req, res) => {
 // ============ ADMIN: GET NOMINATIONS + SUMMARY ============
 app.get("/api/admin/nominations", async (req, res) => {
   try {
-    // list submissions
     const [rows] = await pool.execute(
       `
       SELECT
@@ -203,8 +221,9 @@ app.get("/api/admin/nominations", async (req, res) => {
         s.name AS student_name,
         w.\`class\` AS student_class,
         w.nomination_vote_1 AS vote1,
+        w.nomination_reason_1 AS reason1,
         w.nomination_vote_2 AS vote2,
-        w.nomination_reason AS reason,
+        w.nomination_reason_2 AS reason2,
         w.updated_at
       FROM wisuda_questionnaire w
       LEFT JOIN student s ON s.uuid = w.uuid
@@ -213,7 +232,6 @@ app.get("/api/admin/nominations", async (req, res) => {
       `
     );
 
-    // summary vote counts (vote1 + vote2 digabung)
     const [summary] = await pool.execute(
       `
       SELECT vote, COUNT(*) AS total

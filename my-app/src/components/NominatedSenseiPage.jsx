@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { session } from "../auth/session";
 import "./NominatedSenseiPage.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3003";
+// IMPORTANT: default "" biar prod same-origin (/api/..)
+const API_BASE = import.meta.env.VITE_API_BASE || "";
 
 export default function NominatedSenseiPage() {
   const navigate = useNavigate();
@@ -58,7 +59,10 @@ export default function NominatedSenseiPage() {
   const [step, setStep] = useState(1); // 1: class, 2: pick
   const [kelas, setKelas] = useState("");
   const [selected, setSelected] = useState([]); // min 1, max 2
-  const [reason, setReason] = useState("");
+
+  // ✅ alasan per sensei (jadi 2 input kalau pilih 2)
+  const [reasonsByName, setReasonsByName] = useState({}); // { [senseiName]: string }
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ===== overlay / animation state =====
@@ -94,7 +98,6 @@ export default function NominatedSenseiPage() {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    // target size untuk ghost (portrait 4:6)
     const targetW =
       count === 1 ? Math.min(320, Math.floor(vw * 0.78)) : Math.min(240, Math.floor(vw * 0.44));
     const targetH = Math.round(targetW * 1.5);
@@ -117,7 +120,6 @@ export default function NominatedSenseiPage() {
           height: targetH,
         };
 
-        // FLIP invert
         const dx = from.left - to.left;
         const dy = from.top - to.top;
         const sx = from.width / to.width;
@@ -148,7 +150,6 @@ export default function NominatedSenseiPage() {
     setGhostPhase("init");
     setGhosts(items);
 
-    // hide originals in same render commit
     const m = {};
     selected.forEach((n) => (m[n] = true));
     setGhostedMap(m);
@@ -157,7 +158,6 @@ export default function NominatedSenseiPage() {
       requestAnimationFrame(() => setGhostPhase("play"));
     });
 
-    // crossfade sheet in
     window.setTimeout(() => {
       setShowSheet(true);
       setGhostPhase("fade");
@@ -188,8 +188,22 @@ export default function NominatedSenseiPage() {
     if (step === 2) setStep(1);
   };
 
+  const reasonFor = (name) => (reasonsByName[name] ?? "");
+  const setReasonFor = (name, val) => {
+    setReasonsByName((prev) => ({ ...prev, [name]: val }));
+  };
+
+  const vote1Name = selected[0] || "";
+  const vote2Name = selected[1] || "";
+
+  const reason1 = vote1Name ? reasonFor(vote1Name).trim() : "";
+  const reason2 = vote2Name ? reasonFor(vote2Name).trim() : "";
+
+  const canSubmit =
+    selected.length === 1 ? !!reason1 : selected.length === 2 ? !!reason1 && !!reason2 : false;
+
   const submitNomination = async () => {
-    if (!kelas || selected.length < 1 || selected.length > 2 || !reason.trim() || isSubmitting) return;
+    if (!kelas || selected.length < 1 || selected.length > 2 || !canSubmit || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
@@ -203,9 +217,10 @@ export default function NominatedSenseiPage() {
         },
         body: JSON.stringify({
           student_class: kelas,
-          vote1: selected[0],
-          vote2: selected[1] ?? null,
-          reason,
+          vote1: vote1Name,
+          vote2: vote2Name || null,
+          reason1: reasonFor(vote1Name),
+          reason2: vote2Name ? reasonFor(vote2Name) : null,
         }),
       });
 
@@ -223,7 +238,10 @@ export default function NominatedSenseiPage() {
       }
 
       alert("✅ Terima kasih! Nominasi tersimpan.");
-      navigate("/nominations/done", { replace: true, state: { formName: "Nominasi Sensei Terbaik" }, });
+      navigate("/nominations/done", {
+        replace: true,
+        state: { formName: "Nominasi Sensei Terbaik" },
+      });
     } catch {
       alert("❌ API tidak bisa dihubungi");
     } finally {
@@ -257,11 +275,7 @@ export default function NominatedSenseiPage() {
               }}
             >
               <div className="senseiMedia senseiMedia--ghost">
-                <img
-                  src={it.img}
-                  alt={it.name}
-                  onError={(e) => (e.currentTarget.src = "/logo.png")}
-                />
+                <img src={it.img} alt={it.name} onError={(e) => (e.currentTarget.src = "/logo.png")} />
                 <div className="senseiShade" />
                 <div className="senseiMeta">
                   <div className="senseiMetaTop">
@@ -291,11 +305,7 @@ export default function NominatedSenseiPage() {
                 {selectedInfo.map((s) => (
                   <div key={s.name} className="nom-pickedCard nom-pickedCard--portrait">
                     <div className="senseiMedia">
-                      <img
-                        src={s.img}
-                        alt={s.name}
-                        onError={(e) => (e.currentTarget.src = "/logo.png")}
-                      />
+                      <img src={s.img} alt={s.name} onError={(e) => (e.currentTarget.src = "/logo.png")} />
                       <div className="senseiShade" />
                       <div className="senseiMeta">
                         <div className="senseiMetaTop">
@@ -312,14 +322,22 @@ export default function NominatedSenseiPage() {
                 ))}
               </div>
 
-              <label className="nom-label">Apa yang membuat sensei tersebut menjadi favorit?</label>
-              <textarea
-                className="nom-textarea nom-textarea--sheet"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Tulis alasanmu di sini..."
-                rows={5}
-              />
+              {/* ✅ 2 input alasan (sesuai vote1/vote2) */}
+              {selected.map((name, idx) => (
+                <div key={name} style={{ marginTop: 10 }}>
+                  <label className="nom-label">
+                    Apa yang membuat <b>{name}</b> {idx === 0 ? "menjadi yang terbaik?" : "menjadi yang terbaik?"}
+                  </label>
+                  <textarea
+                    className="nom-textarea nom-textarea--sheet"
+                    value={reasonFor(name)}
+                    onChange={(e) => setReasonFor(name, e.target.value)}
+                    placeholder="Tulis alasanmu di sini..."
+                    rows={4}
+                    disabled={isSubmitting}
+                  />
+                </div>
+              ))}
 
               <div className="nom-sheet-actions">
                 <button
@@ -331,12 +349,7 @@ export default function NominatedSenseiPage() {
                   ← Ubah Pilihan
                 </button>
 
-                <button
-                  type="button"
-                  className="nom-btn"
-                  onClick={submitNomination}
-                  disabled={!reason.trim() || isSubmitting}
-                >
+                <button type="button" className="nom-btn" onClick={submitNomination} disabled={!canSubmit || isSubmitting}>
                   {isSubmitting ? "⏳ Menyimpan..." : "✅ Selesai & Kirim"}
                 </button>
               </div>
@@ -348,10 +361,6 @@ export default function NominatedSenseiPage() {
       {/* Background */}
       <div className={`nom-wrap ${overlayOpen ? "is-blurred" : ""}`}>
         <div className="nom-top">
-          {/* <Link className="nom-back" to="/questionnaire">
-            ← Kembali
-          </Link> */}
-
           <div className="nom-titleWrap">
             <div className="nom-badge">SAMIT</div>
             <h1 className="nom-title">Nominasi Sensei Terbaik</h1>
@@ -433,11 +442,7 @@ export default function NominatedSenseiPage() {
                         disabled={blocked || overlayOpen}
                       >
                         <div className="senseiMedia">
-                          <img
-                            src={s.img}
-                            alt={s.name}
-                            onError={(e) => (e.currentTarget.src = "/logo.png")}
-                          />
+                          <img src={s.img} alt={s.name} onError={(e) => (e.currentTarget.src = "/logo.png")} />
                           <div className="senseiShade" />
 
                           <div className="senseiMeta">

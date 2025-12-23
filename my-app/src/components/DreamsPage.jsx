@@ -240,24 +240,24 @@ function DreamsPage() {
     };
   }, []);
 
-  const handleDone = async () => {
-    setDoneLoading(true);
-    try {
-      const token = session.getToken();
-      const res = await fetch("http://localhost:3003/api/wisuda/dreams", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) return alert("❌ " + (data.message || "Gagal"));
-      alert("✅ Terima kasih! Harapan sudah selesai.");
-      navigate("/questionnaire", { replace: true });
-    } catch (e) {
-      alert("❌ API tidak bisa dihubungi");
-    } finally {
-      setDoneLoading(false);
-    }
-  };
+  // const handleDone = async () => {
+  //   setDoneLoading(true);
+  //   try {
+  //     const token = session.getToken();
+  //     const res = await fetch("http://localhost:3003/api/wisuda/dreams", {
+  //       method: "POST",
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     const data = await res.json();
+  //     if (!res.ok) return alert("❌ " + (data.message || "Gagal"));
+  //     alert("✅ Terima kasih! Harapan sudah selesai.");
+  //     navigate("/questionnaire", { replace: true });
+  //   } catch (e) {
+  //     alert("❌ API tidak bisa dihubungi");
+  //   } finally {
+  //     setDoneLoading(false);
+  //   }
+  // };
 
   // Manual audio control functions
   const toggleMusic = () => {
@@ -306,13 +306,8 @@ function DreamsPage() {
       {/* Welcome Overlay */}
       {showWelcome && (
         <div className="welcome-overlay">
-          {/* BACK di overlay */}
-          <Link className="dream-back overlay-back" to="/questionnaire">
-            ← Kembali
-          </Link>
-
           <div className="graduation-cap">🎓</div>
-          <div className="welcome-text">第9回サミットの卒業式　</div>
+          <div className="welcome-text">第10回サミットの卒業式　</div>
           <div className="subtitle">Wisuda LPK SAMIT</div>
 
           <div className="warning-text">Harap naikkan volume HP Minna-san ya 😇</div>
@@ -332,13 +327,6 @@ function DreamsPage() {
 
       {/* Main Content */}
       <div className="main-content">
-        {/* BACK di page utama */}
-        <div className="dream-top">
-          <Link className="dream-back" to="/questionnaire">
-            ← Kembali
-          </Link>
-        </div>
-
         <div className="hero">
           <div className="family-title-container">
             <h2 className="family-title">
@@ -375,11 +363,11 @@ function DreamsPage() {
         </div>
       </div>
 
-      <div className="form-actions">
+      {/* <div className="form-actions">
         <button className="done-btn" type="button" onClick={handleDone} disabled={doneLoading}>
             {doneLoading ? "⏳ Menyimpan..." : "✅ Selesai"}
         </button>
-      </div>
+      </div> */}
 
       {/* Background Music */}
       <audio

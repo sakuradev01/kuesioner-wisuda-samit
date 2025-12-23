@@ -83,7 +83,7 @@ export default function AdminDashboard() {
     return String(v);
   };
 
-  const reasonPreview = (txt, max = 70) => {
+  const reasonPreview = (txt, max = 60) => {
     const s = String(txt || "").trim();
     if (!s) return "-";
     return s.length > max ? s.slice(0, max) + "..." : s;
@@ -141,25 +141,41 @@ export default function AdminDashboard() {
     if (q) {
       rows = rows.filter((r) => {
         const student = (r.student_name || r.uuid || "").toLowerCase();
+        const uuid = (r.uuid || "").toLowerCase();
         const v1 = (r.vote1 || "").toLowerCase();
         const v2 = (r.vote2 || "").toLowerCase();
+        const reason1 = (r.reason1 || "").toLowerCase();
+        const reason2 = (r.reason2 || "").toLowerCase();
         const kelas = (r.student_class || "").toLowerCase();
         return (
           student.includes(q) ||
+          uuid.includes(q) ||
           v1.includes(q) ||
           v2.includes(q) ||
+          reason1.includes(q) ||
+          reason2.includes(q) ||
           kelas.includes(q)
         );
       });
     }
 
-    // IMPORTANT: ga di-sort sama sekali (mengikuti urutan dari backend)
+    // NOTE: server sudah ORDER BY updated_at DESC, jadi biarin urutan asli
     return rows;
   }, [data, searchTerm, kelasFilter, selectedSensei]);
 
   // ===== export excel =====
   const exportExcel = () => {
-    const headers = ["No", "UUID", "Nama Siswa", "Kelas", "Vote 1", "Vote 2", "Alasan", "Updated (Jakarta)"];
+    const headers = [
+      "No",
+      "UUID",
+      "Nama Siswa",
+      "Kelas",
+      "Vote 1",
+      "Alasan Vote 1",
+      "Vote 2",
+      "Alasan Vote 2",
+      "Updated (Jakarta)",
+    ];
 
     const rows = filteredRows.map((r, idx) => [
       idx + 1,
@@ -167,15 +183,15 @@ export default function AdminDashboard() {
       r.student_name || "",
       r.student_class || "",
       r.vote1 || "",
+      r.reason1 || "",
       r.vote2 || "",
-      r.reason || "",
+      r.reason2 || "",
       formatUpdated(r.updated_at),
     ]);
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     XLSX.utils.book_append_sheet(wb, ws, "Nominasi Sensei");
-
     XLSX.writeFile(wb, `nominasi-sensei-${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
@@ -212,7 +228,6 @@ export default function AdminDashboard() {
         <div className="header-content">
           <div>
             <h1>📊 Dashboard Admin — Nominasi Sensei</h1>
-
             <div className="header-sub">
               <span>
                 Submissions: <b>{totalSubmissions}</b>
@@ -231,7 +246,6 @@ export default function AdminDashboard() {
                       className="chip-clear"
                       onClick={() => setSelectedSensei(null)}
                       title="Clear sensei filter"
-                      type="button"
                     >
                       ✕
                     </button>
@@ -275,20 +289,20 @@ export default function AdminDashboard() {
           </div>
         </section>
 
-        {/* SEARCH + FILTER KELAS + ACTIONS */}
+        {/* SEARCH + FILTER + ACTIONS */}
         <div className="search-section">
           <div className="search-container">
             <div className="search-header">
               <input
                 className="search-input"
                 type="text"
-                placeholder="🔍 Cari nama siswa / sensei / kelas..."
+                placeholder="🔍 Cari nama siswa / uuid / sensei / alasan / kelas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
 
               <div className="action-buttons">
-                {/* filter kelas (ONLY FILTER YANG KAMU MAU) */}
+                {/* filter kelas */}
                 <select
                   className="search-input select-compact"
                   value={kelasFilter}
@@ -306,24 +320,22 @@ export default function AdminDashboard() {
                   <button
                     className={`toggle-btn ${viewMode === "table" ? "active" : ""}`}
                     onClick={() => setViewMode("table")}
-                    type="button"
                   >
                     📊 Table
                   </button>
                   <button
                     className={`toggle-btn ${viewMode === "card" ? "active" : ""}`}
                     onClick={() => setViewMode("card")}
-                    type="button"
                   >
                     📋 Card
                   </button>
                 </div>
 
-                <button className="refresh-btn" onClick={fetchNominations} type="button">
+                <button className="refresh-btn" onClick={fetchNominations}>
                   🔄 Refresh
                 </button>
 
-                <button className="export-btn" onClick={exportExcel} type="button">
+                <button className="export-btn" onClick={exportExcel}>
                   📗 Export Excel
                 </button>
               </div>
@@ -352,18 +364,23 @@ export default function AdminDashboard() {
                   <div className="info-item">
                     <strong>Kelas:</strong> {r.student_class || "-"}
                   </div>
+
                   <div className="info-item">
                     <strong>Vote 1:</strong> {r.vote1 || "-"}
                   </div>
+                  <div className="info-item message">
+                    <strong>Alasan 1:</strong> "{reasonPreview(r.reason1)}"
+                  </div>
+
                   <div className="info-item">
                     <strong>Vote 2:</strong> {r.vote2 || "-"}
                   </div>
                   <div className="info-item message">
-                    <strong>Alasan:</strong> "{reasonPreview(r.reason)}"
+                    <strong>Alasan 2:</strong> "{reasonPreview(r.reason2)}"
                   </div>
                 </div>
 
-                <button className="view-detail-btn" onClick={() => setSelectedRow(r)} type="button">
+                <button className="view-detail-btn" onClick={() => setSelectedRow(r)}>
                   👁️ Lihat Detail
                 </button>
               </div>
@@ -380,9 +397,10 @@ export default function AdminDashboard() {
                     <th>UUID</th>
                     <th>Kelas</th>
                     <th>Vote 1</th>
+                    <th>Alasan 1</th>
                     <th>Vote 2</th>
-                    <th>Alasan</th>
-                    <th>Created</th>
+                    <th>Alasan 2</th>
+                    <th>Updated</th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
@@ -395,18 +413,16 @@ export default function AdminDashboard() {
                       <td className="uuid-cell">{r.uuid}</td>
                       <td>{r.student_class || "-"}</td>
                       <td className="vote-cell">{r.vote1 || "-"}</td>
+                      <td className="message-cell">
+                        <span className="message-preview">{reasonPreview(r.reason1, 42)}</span>
+                      </td>
                       <td className="vote-cell">{r.vote2 || "-"}</td>
                       <td className="message-cell">
-                        <span className="message-preview">{reasonPreview(r.reason, 50)}</span>
+                        <span className="message-preview">{reasonPreview(r.reason2, 42)}</span>
                       </td>
                       <td className="timestamp-cell">{formatUpdated(r.updated_at)}</td>
                       <td>
-                        <button
-                          className="table-detail-btn"
-                          onClick={() => setSelectedRow(r)}
-                          title="Lihat Detail"
-                          type="button"
-                        >
+                        <button className="table-detail-btn" onClick={() => setSelectedRow(r)} title="Lihat Detail">
                           👁️
                         </button>
                       </td>
@@ -431,7 +447,7 @@ export default function AdminDashboard() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Detail Nominasi</h2>
-              <button className="close-btn" onClick={() => setSelectedRow(null)} type="button">
+              <button className="close-btn" onClick={() => setSelectedRow(null)}>
                 ✕
               </button>
             </div>
@@ -467,12 +483,17 @@ export default function AdminDashboard() {
                     <span>{selectedRow.vote1 || "-"}</span>
                   </div>
                   <div className="detail-item">
+                    <label>Alasan 1</label>
+                    <span>"{selectedRow.reason1 || "-"}"</span>
+                  </div>
+
+                  <div className="detail-item">
                     <label>Vote 2</label>
                     <span>{selectedRow.vote2 || "-"}</span>
                   </div>
-                  <div className="detail-item full-width">
-                    <label>Alasan</label>
-                    <span>"{selectedRow.reason || "-"}"</span>
+                  <div className="detail-item">
+                    <label>Alasan 2</label>
+                    <span>"{selectedRow.reason2 || "-"}"</span>
                   </div>
                 </div>
               </div>

@@ -18,6 +18,7 @@ function App() {
       <Routes>
         <Route path="/" element={<StudentLogin />} />
         <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/student-dreams" element={<DreamsPage />} />
 
         {/* Student protected */}
         <Route element={<RequireAuth role="student" />}>
@@ -25,7 +26,6 @@ function App() {
           <Route path="/nominations/done" element={<IsDonePage />} />
           
           {/* <Route path="/questionnaire" element={<HomePage />} /> */}
-          {/* <Route path="/questionnaire/dreams" element={<DreamsPage />} /> */}
         </Route>
 
         {/* Admin protected */}
