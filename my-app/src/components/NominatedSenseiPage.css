@@ -180,7 +180,7 @@
   border-radius:22px;
   overflow:hidden;
   position:relative;
-  aspect-ratio: 4 / 6;
+  aspect-ratio: 3 / 4;
 }
 
 /* media */
@@ -409,7 +409,7 @@
 }
 
 .nom-pickedCard--portrait{
-  aspect-ratio: 4 / 6;
+  aspect-ratio: 3 / 4;
 }
 
 .nom-label{

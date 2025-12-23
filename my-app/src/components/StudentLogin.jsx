@@ -76,7 +76,7 @@ function StudentLogin() {
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="login-header">
             <h2>🔐 Login</h2>
-            <p>Selamat datang calon wisudawan</p>
+            <p>Selamat datang para wisudawan</p>
           </div>
 
           <div className="form-group">

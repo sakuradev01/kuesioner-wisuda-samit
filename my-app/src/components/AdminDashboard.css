@@ -754,3 +754,42 @@
     font-size: 12px;
   }
 }
+
+/* clickable summary items */
+.summary-btn{
+  border: 1px solid #eef0f3;
+  background: #fafbfc;
+  cursor: pointer;
+  text-align: left;
+}
+.summary-btn:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+.summary-btn.active{
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+}
+
+/* compact select next to search */
+.select-compact{
+  max-width: 220px;
+}
+
+/* sortable table headers */
+.th-sort{
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* small clear chip */
+.chip-clear{
+  margin-left: 6px;
+  border: none;
+  background: #eee;
+  border-radius: 999px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.chip-clear:hover{ background: #ddd; }

@@ -15,18 +15,18 @@ export default function NominatedSenseiPage() {
 
   const senseiOptions = useMemo(
     () => [
-      { name: "Eva Sensei", img: "/family.png", role: "Japanese Instructor", field: "Bandung" },
-      { name: "Fifi Sensei", img: "/family.png", role: "Japanese Instructor", field: "Yogyakarta" },
-      { name: "Dedy Sensei", img: "/family.png", role: "Japanese Instructor", field: "Surabaya" },
-      { name: "Marita Sensei", img: "/family.png", role: "Japanese Instructor", field: "Surabaya" },
-      { name: "Niko Sensei", img: "/family.png", role: "Japanese Instructor", field: "Tangerang" },
-      { name: "Sarah Sensei", img: "/family.png", role: "Japanese Instructor", field: "Tangerang" },
-      { name: "Gagah Sensei", img: "/family.png", role: "Japanese Instructor", field: "Basic Level" },
-      { name: "Gilang Sensei", img: "/family.png", role: "Japanese Instructor", field: "Basic Level" },
-      { name: "Crystal Sensei", img: "/family.png", role: "Japanese Instructor", field: "Advance Level" },
+      { name: "Eva Sensei", img: "/eva.png", role: "Japanese Instructor", field: "Bandung" },
+      { name: "Fifi Sensei", img: "/fifi.png", role: "Japanese Instructor", field: "Yogyakarta" },
+      { name: "Dedy Sensei", img: "/dedi.png", role: "Japanese Instructor", field: "Surabaya" },
+      { name: "Marita Sensei", img: "/marita.png", role: "Japanese Instructor", field: "Surabaya" },
+      { name: "Niko Sensei", img: "/niko.png", role: "Japanese Instructor", field: "Tangerang" },
+      { name: "Sarah Sensei", img: "/sarah.png", role: "Japanese Instructor", field: "Tangerang" },
+      { name: "Gagah Sensei", img: "/gagah.png", role: "Japanese Instructor", field: "Basic Level" },
+      { name: "Gilang Sensei", img: "/gilang.png", role: "Japanese Instructor", field: "Basic Level" },
+      { name: "Crystal Sensei", img: "/crystal.png", role: "Japanese Instructor", field: "Advance Level" },
       { name: "Saidah Sensei", img: "/saidah.png", role: "Japanese Instructor", field: "Advance Level" },
-      { name: "Ega Sensei", img: "/family.png", role: "Japanese Instructor", field: "SSW - Caregiver" },
-      { name: "Derisna Sensei", img: "/family.png", role: "Japanese Instructor", field: "SSW - Food Service" },
+      { name: "Ega Sensei", img: "/ega.png", role: "Japanese Instructor", field: "SSW - Caregiver" },
+      { name: "Derisna Sensei", img: "/derisna.png", role: "Japanese Instructor", field: "SSW - Food Service" },
     ],
     []
   );
@@ -312,7 +312,7 @@ export default function NominatedSenseiPage() {
                 ))}
               </div>
 
-              <label className="nom-label">Apa yang membuat Sensei tersebut menjadi terbaik?</label>
+              <label className="nom-label">Apa yang membuat sensei tersebut menjadi favorit?</label>
               <textarea
                 className="nom-textarea nom-textarea--sheet"
                 value={reason}
@@ -339,10 +339,6 @@ export default function NominatedSenseiPage() {
                 >
                   {isSubmitting ? "⏳ Menyimpan..." : "✅ Selesai & Kirim"}
                 </button>
-              </div>
-
-              <div className="nom-hint nom-hint--sheet">
-                * Setelah submit, menu “Nominasi” di homepage akan otomatis terkunci (✅).
               </div>
             </div>
           )}
