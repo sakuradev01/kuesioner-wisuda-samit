@@ -27,8 +27,8 @@ export default function AdminDashboard() {
     []
   );
 
-  const [data, setData] = useState([]); // nominations rows
-  const [summary, setSummary] = useState([]); // [{ vote, total }]
+  const [data, setData] = useState([]);
+  const [summary, setSummary] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -36,8 +36,11 @@ export default function AdminDashboard() {
   const [kelasFilter, setKelasFilter] = useState("ALL");
   const [selectedSensei, setSelectedSensei] = useState(null);
 
-  const [viewMode, setViewMode] = useState("table"); // table | card
+  const [viewMode, setViewMode] = useState("table");
   const [selectedRow, setSelectedRow] = useState(null);
+
+  const [batch, setBatch] = useState(null);
+  const [switchingBatch, setSwitchingBatch] = useState(false);
 
   const fetchNominations = async () => {
     try {
@@ -46,10 +49,14 @@ export default function AdminDashboard() {
 
       const res = await fetch(`${API_BASE}/api/admin/nominations`);
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.message || "Gagal ambil data admin");
+
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal ambil data admin");
+      }
 
       setData(Array.isArray(json.nominations) ? json.nominations : []);
       setSummary(Array.isArray(json.summary) ? json.summary : []);
+      setBatch(json.batch || null);
     } catch (e) {
       console.error(e);
       setError(e?.message || "Error");
@@ -60,14 +67,13 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchNominations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleLogout = () => navigate("/admin");
 
-  // ===== helpers =====
   const formatUpdated = (v) => {
     if (!v) return "-";
+
     const d = new Date(String(v));
     if (!Number.isNaN(d.getTime())) {
       try {
@@ -80,19 +86,54 @@ export default function AdminDashboard() {
         return String(v);
       }
     }
+
     return String(v);
+  };
+
+  const handleNextBatch = async () => {
+    const currentLabel = batch?.label || `Batch ${batch?.batch_no || "-"}`;
+
+    const ok = window.confirm(
+      `Yakin lanjut ke batch berikutnya?\n\n${currentLabel} tetap tersimpan sebagai histori, tapi dashboard akan mulai dari 0 untuk batch baru.`
+    );
+
+    if (!ok) return;
+
+    try {
+      setSwitchingBatch(true);
+      setError(null);
+
+      const res = await fetch(`${API_BASE}/api/admin/batches/next`, {
+        method: "POST",
+      });
+
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal pindah batch");
+      }
+
+      await fetchNominations();
+      alert(`Berhasil pindah ke ${json.batch?.label || "batch baru"}`);
+    } catch (e) {
+      console.error(e);
+      setError(e?.message || "Error");
+    } finally {
+      setSwitchingBatch(false);
+    }
   };
 
   const reasonPreview = (txt, max = 60) => {
     const s = String(txt || "").trim();
     if (!s) return "-";
-    return s.length > max ? s.slice(0, max) + "..." : s;
+    return s.length > max ? `${s.slice(0, max)}...` : s;
   };
 
-  // ===== summary counts (pastikan semua sensei muncul) =====
   const countsMap = useMemo(() => {
     const m = {};
-    for (const it of summary) m[it.vote] = Number(it.total || 0);
+    for (const it of summary) {
+      m[it.vote] = Number(it.total || 0);
+    }
     return m;
   }, [summary]);
 
@@ -104,12 +145,7 @@ export default function AdminDashboard() {
   }, [senseiList, countsMap]);
 
   const totalSubmissions = data.length;
-  const totalVotes = useMemo(
-    () => summary.reduce((acc, x) => acc + Number(x.total || 0), 0),
-    [summary]
-  );
 
-  // ===== kelas options from data =====
   const kelasOptions = useMemo(() => {
     const set = new Set();
     for (const r of data) {
@@ -119,25 +155,25 @@ export default function AdminDashboard() {
     return ["ALL", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [data]);
 
-  // ===== filter (NO SORTING) =====
   const filteredRows = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
 
     let rows = data;
 
-    // filter kelas
     if (kelasFilter !== "ALL") {
-      rows = rows.filter((r) => String(r.student_class || "").trim() === kelasFilter);
-    }
-
-    // filter sensei (klik summary)
-    if (selectedSensei) {
       rows = rows.filter(
-        (r) => String(r.vote1 || "") === selectedSensei || String(r.vote2 || "") === selectedSensei
+        (r) => String(r.student_class || "").trim() === kelasFilter
       );
     }
 
-    // search
+    if (selectedSensei) {
+      rows = rows.filter(
+        (r) =>
+          String(r.vote1 || "") === selectedSensei ||
+          String(r.vote2 || "") === selectedSensei
+      );
+    }
+
     if (q) {
       rows = rows.filter((r) => {
         const student = (r.student_name || r.uuid || "").toLowerCase();
@@ -147,6 +183,7 @@ export default function AdminDashboard() {
         const reason1 = (r.reason1 || "").toLowerCase();
         const reason2 = (r.reason2 || "").toLowerCase();
         const kelas = (r.student_class || "").toLowerCase();
+
         return (
           student.includes(q) ||
           uuid.includes(q) ||
@@ -159,11 +196,9 @@ export default function AdminDashboard() {
       });
     }
 
-    // NOTE: server sudah ORDER BY updated_at DESC, jadi biarin urutan asli
     return rows;
   }, [data, searchTerm, kelasFilter, selectedSensei]);
 
-  // ===== export excel =====
   const exportExcel = () => {
     const headers = [
       "No",
@@ -191,11 +226,17 @@ export default function AdminDashboard() {
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
     XLSX.utils.book_append_sheet(wb, ws, "Nominasi Sensei");
-    XLSX.writeFile(wb, `nominasi-sensei-${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+    XLSX.writeFile(
+      wb,
+      `nominasi-sensei-batch-${batch?.batch_no || 1}-${new Date()
+        .toISOString()
+        .slice(0, 10)}.xlsx`
+    );
   };
 
-  // ===== UI states =====
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -228,13 +269,16 @@ export default function AdminDashboard() {
         <div className="header-content">
           <div>
             <h1>📊 Dashboard Admin — Nominasi Sensei</h1>
+
             <div className="header-sub">
               <span>
-                Submissions: <b>{totalSubmissions}</b>
+                Batch Aktif: <b>{batch?.label || "-"}</b>
               </span>
+
               <span className="dot">•</span>
+
               <span>
-                Total Votes: <b>{totalVotes}</b>
+                Submissions: <b>{totalSubmissions}</b>
               </span>
 
               {selectedSensei && (
@@ -262,23 +306,36 @@ export default function AdminDashboard() {
       </header>
 
       <div className="dashboard-content">
-        {/* SUMMARY (CLICKABLE) */}
         <section className="summary-section">
           <div className="summary-card">
-            <div className="summary-title">🏆 Summary Vote per Sensei (klik untuk filter)</div>
+            <div className="summary-title">
+              🏆 Summary Vote per Sensei (klik untuk filter)
+            </div>
+
             <div className="summary-grid">
               {summaryFull
                 .slice()
                 .sort((a, b) => b.total - a.total)
                 .map((s) => {
                   const active = selectedSensei === s.name;
+
                   return (
                     <button
                       key={s.name}
                       type="button"
-                      className={`summary-item summary-btn ${active ? "active" : ""}`}
-                      onClick={() => setSelectedSensei((prev) => (prev === s.name ? null : s.name))}
-                      title={active ? "Klik untuk reset filter" : `Tampilkan yang vote ${s.name}`}
+                      className={`summary-item summary-btn ${
+                        active ? "active" : ""
+                      }`}
+                      onClick={() =>
+                        setSelectedSensei((prev) =>
+                          prev === s.name ? null : s.name
+                        )
+                      }
+                      title={
+                        active
+                          ? "Klik untuk reset filter"
+                          : `Tampilkan yang vote ${s.name}`
+                      }
                     >
                       <div className="summary-name">{s.name}</div>
                       <div className="summary-count">{s.total}</div>
@@ -289,7 +346,6 @@ export default function AdminDashboard() {
           </div>
         </section>
 
-        {/* SEARCH + FILTER + ACTIONS */}
         <div className="search-section">
           <div className="search-container">
             <div className="search-header">
@@ -302,7 +358,6 @@ export default function AdminDashboard() {
               />
 
               <div className="action-buttons">
-                {/* filter kelas */}
                 <select
                   className="search-input select-compact"
                   value={kelasFilter}
@@ -318,13 +373,17 @@ export default function AdminDashboard() {
 
                 <div className="view-toggle">
                   <button
-                    className={`toggle-btn ${viewMode === "table" ? "active" : ""}`}
+                    className={`toggle-btn ${
+                      viewMode === "table" ? "active" : ""
+                    }`}
                     onClick={() => setViewMode("table")}
                   >
                     📊 Table
                   </button>
                   <button
-                    className={`toggle-btn ${viewMode === "card" ? "active" : ""}`}
+                    className={`toggle-btn ${
+                      viewMode === "card" ? "active" : ""
+                    }`}
                     onClick={() => setViewMode("card")}
                   >
                     📋 Card
@@ -335,6 +394,14 @@ export default function AdminDashboard() {
                   🔄 Refresh
                 </button>
 
+                <button
+                  className="next-batch-btn"
+                  onClick={handleNextBatch}
+                  disabled={switchingBatch}
+                >
+                  {switchingBatch ? "⏳ Proses..." : "⏭️ Next Batch"}
+                </button>
+
                 <button className="export-btn" onClick={exportExcel}>
                   📗 Export Excel
                 </button>
@@ -342,12 +409,14 @@ export default function AdminDashboard() {
             </div>
 
             <div className="search-info">
-              Menampilkan {filteredRows.length} dari {data.length} submissions
+              <span>
+                Menampilkan {filteredRows.length} dari {data.length} submissions
+              </span>
+              <span>Batch aktif: {batch?.label || "-"}</span>
             </div>
           </div>
         </div>
 
-        {/* LIST */}
         {viewMode === "card" ? (
           <div className="students-grid">
             {filteredRows.map((r, idx) => (
@@ -380,7 +449,10 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <button className="view-detail-btn" onClick={() => setSelectedRow(r)}>
+                <button
+                  className="view-detail-btn"
+                  onClick={() => setSelectedRow(r)}
+                >
                   👁️ Lihat Detail
                 </button>
               </div>
@@ -409,20 +481,32 @@ export default function AdminDashboard() {
                   {filteredRows.map((r, i) => (
                     <tr key={`${r.uuid}-${i}`}>
                       <td>{i + 1}</td>
-                      <td className="name-cell">{r.student_name || "(Nama tidak ditemukan)"}</td>
+                      <td className="name-cell">
+                        {r.student_name || "(Nama tidak ditemukan)"}
+                      </td>
                       <td className="uuid-cell">{r.uuid}</td>
                       <td>{r.student_class || "-"}</td>
                       <td className="vote-cell">{r.vote1 || "-"}</td>
                       <td className="message-cell">
-                        <span className="message-preview">{reasonPreview(r.reason1, 42)}</span>
+                        <span className="message-preview">
+                          {reasonPreview(r.reason1, 42)}
+                        </span>
                       </td>
                       <td className="vote-cell">{r.vote2 || "-"}</td>
                       <td className="message-cell">
-                        <span className="message-preview">{reasonPreview(r.reason2, 42)}</span>
+                        <span className="message-preview">
+                          {reasonPreview(r.reason2, 42)}
+                        </span>
                       </td>
-                      <td className="timestamp-cell">{formatUpdated(r.updated_at)}</td>
+                      <td className="timestamp-cell">
+                        {formatUpdated(r.updated_at)}
+                      </td>
                       <td>
-                        <button className="table-detail-btn" onClick={() => setSelectedRow(r)} title="Lihat Detail">
+                        <button
+                          className="table-detail-btn"
+                          onClick={() => setSelectedRow(r)}
+                          title="Lihat Detail"
+                        >
                           👁️
                         </button>
                       </td>
@@ -441,13 +525,18 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL */}
       {selectedRow && (
         <div className="modal-overlay" onClick={() => setSelectedRow(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>Detail Nominasi</h2>
-              <button className="close-btn" onClick={() => setSelectedRow(null)}>
+              <button
+                className="close-btn"
+                onClick={() => setSelectedRow(null)}
+              >
                 ✕
               </button>
             </div>
@@ -458,7 +547,9 @@ export default function AdminDashboard() {
                 <div className="detail-grid">
                   <div className="detail-item">
                     <label>Nama</label>
-                    <span>{selectedRow.student_name || "(Nama tidak ditemukan)"}</span>
+                    <span>
+                      {selectedRow.student_name || "(Nama tidak ditemukan)"}
+                    </span>
                   </div>
                   <div className="detail-item">
                     <label>UUID</label>
