@@ -10,7 +10,7 @@ export default function NominatedSenseiPage() {
   const navigate = useNavigate();
 
   const classOptions = useMemo(
-    () => ["Tangerang A", "Tangerang B", "Tangerang C", "Tangerang D", "Fukushuu AB"],
+    () => ["Tangerang E", "Tangerang F", "Tangerang G", "Tangerang H", "Fukushuu CD", "Fukushuu EF"],
     []
   );
 
