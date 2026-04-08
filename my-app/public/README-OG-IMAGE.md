@@ -14,7 +14,7 @@ Based on WhatsApp official documentation, create an optimized image for perfect 
 1. **Safe Area**: Keep important content 80px from edges
 2. **Logo Placement**: Center the logo with contain/fit (no cropping)
 3. **Background**: Use gradient or solid color that matches theme
-4. **Text**: Include "WISUDA LPK SAMIT" and "第9回サミットの卒業式"
+4. **Text**: Include "WISUDA LPK SAMIT" and "第11回サミットの卒業式"
 5. **Quality**: High quality, clear and readable
 
 ## WhatsApp Optimized Layout (600×315):
@@ -24,7 +24,7 @@ Based on WhatsApp official documentation, create an optimized image for perfect 
 │                                     │
 │     [Logo - centered, contained]    │
 │                                     │
-│    第9回サミットの卒業式            │
+│    第11回サミットの卒業式            │
 │    WISUDA LPK SAMIT                 │
 │                                     │
 │  [30px safe padding]                │

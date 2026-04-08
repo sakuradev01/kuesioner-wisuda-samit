@@ -307,7 +307,7 @@ function DreamsPage() {
       {showWelcome && (
         <div className="welcome-overlay">
           <div className="graduation-cap">🎓</div>
-          <div className="welcome-text">第10回サミットの卒業式　</div>
+          <div className="welcome-text">第11回サミットの卒業式　</div>
           <div className="subtitle">Wisuda LPK SAMIT</div>
 
           <div className="warning-text">Harap naikkan volume HP Minna-san ya 😇</div>
