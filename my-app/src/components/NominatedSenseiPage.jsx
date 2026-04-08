@@ -47,7 +47,7 @@ export default function NominatedSenseiPage() {
         if (st?.isDone_nomination === 1 || st?.isDone_nomination === true) {
           navigate("/nominations/done", {
             replace: true,
-            state: { formName: "Nominasi Sensei Terbaik" },
+            state: { formName: "Nominasi Sensei Terfavorit" },
           });
         }
       } catch {}
@@ -240,7 +240,7 @@ export default function NominatedSenseiPage() {
       alert("✅ Terima kasih! Nominasi tersimpan.");
       navigate("/nominations/done", {
         replace: true,
-        state: { formName: "Nominasi Sensei Terbaik" },
+        state: { formName: "Nominasi Sensei Terfavorit" },
       });
     } catch {
       alert("❌ API tidak bisa dihubungi");
@@ -326,7 +326,7 @@ export default function NominatedSenseiPage() {
               {selected.map((name, idx) => (
                 <div key={name} style={{ marginTop: 10 }}>
                   <label className="nom-label">
-                    Apa yang membuat <b>{name}</b> {idx === 0 ? "menjadi yang terbaik?" : "menjadi yang terbaik?"}
+                    Apa yang membuat <b>{name}</b> {idx === 0 ? "menjadi yang terfavorit?" : "menjadi yang terfavorit?"}
                   </label>
                   <textarea
                     className="nom-textarea nom-textarea--sheet"
@@ -363,7 +363,7 @@ export default function NominatedSenseiPage() {
         <div className="nom-top">
           <div className="nom-titleWrap">
             <div className="nom-badge">SAMIT</div>
-            <h1 className="nom-title">Nominasi Sensei Terbaik</h1>
+            <h1 className="nom-title">Nominasi Sensei Terfavorit</h1>
 
             <div className="nom-progress">
               <span className={`dot ${step >= 1 ? "on" : ""}`} />

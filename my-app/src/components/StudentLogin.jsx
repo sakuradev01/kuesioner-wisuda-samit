@@ -56,7 +56,7 @@ function StudentLogin() {
       if (status?.isDone_nomination === 1 || status?.isDone_nomination === true) {
         navigate("/nominations/done", {
           replace: true,
-          state: { formName: "Nominasi Sensei Terbaik" },
+          state: { formName: "Nominasi Sensei Terfavorit" },
         });
         return;
       }

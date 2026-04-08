@@ -18,7 +18,7 @@ export default function IsDonePage() {
     // fallback kalau user reload / masuk langsung:
     // deteksi dari path
     const path = location.pathname || "";
-    if (path.startsWith("/nominations")) return "Nominasi Sensei Terbaik";
+    if (path.startsWith("/nominations")) return "Nominasi Sensei Terfavorit";
 
     return "Form";
   }, [formNameFromState, location.pathname]);

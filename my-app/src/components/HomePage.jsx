@@ -4,7 +4,7 @@ import { session } from "../auth/session";
 import "./HomePage.css";
 
 const menu = [
-  { key: "nomination", label: "Nominasi Sensei Terbaik", to: "/questionnaire/nominations", icon: "🔐" },
+  { key: "nomination", label: "Nominasi Sensei Terfavorit", to: "/questionnaire/nominations", icon: "🔐" },
   { key: "dreams", label: "Harapan Wisudawan", to: "/questionnaire/dreams", icon: "🎓" },
 ];
 
